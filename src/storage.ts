@@ -138,7 +138,7 @@ export class MemoryStore {
         );
       `);
     } catch (error) {
-      console.warn("[dsh-self-improved] sqlite-vec 不可用，向量检索禁用：", String(error));
+      console.warn("[dsh-self-improved] sqlite-vec unavailable; vector search disabled:", String(error));
       this.vectors = null;
     }
   }

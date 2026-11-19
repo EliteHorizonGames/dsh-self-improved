@@ -231,6 +231,16 @@ window.__ModuleLoader__.load({
       browserMetaKind: "类型",
       browserMetaImportance: "重要度",
       browserMetaAccess: "命中次数",
+      browserAccessSummary: "命中{n}",
+      browserKindFact: "📖事实",
+      browserKindPreference: "📌偏好",
+      browserKindEvent: "🧭事件",
+      browserKindInstruction: "📋指令",
+      browserKindPersona: "👤画像",
+      browserStatusActive: "活跃",
+      browserStatusDecayed: "已衰减",
+      browserStatusForgotten: "已遗忘",
+      browserStatusCorrected: "已纠正",
       browserMetaStatus: "状态",
       browserMetaCreated: "创建时间",
       browserMetaUpdated: "更新时间",
@@ -375,6 +385,16 @@ window.__ModuleLoader__.load({
       browserMetaKind: "Kind",
       browserMetaImportance: "Importance",
       browserMetaAccess: "Access count",
+      browserAccessSummary: "Accesses: {n}",
+      browserKindFact: "📖 Fact",
+      browserKindPreference: "📌 Preference",
+      browserKindEvent: "🧭 Event",
+      browserKindInstruction: "📋 Instruction",
+      browserKindPersona: "👤 Persona",
+      browserStatusActive: "Active",
+      browserStatusDecayed: "Decayed",
+      browserStatusForgotten: "Forgotten",
+      browserStatusCorrected: "Corrected",
       browserMetaStatus: "Status",
       browserMetaCreated: "Created",
       browserMetaUpdated: "Updated",
@@ -673,10 +693,11 @@ window.__ModuleLoader__.load({
     }
 
     // ── 记忆浏览器（设置页第二个标签页；经 dsh-self-improved-browser 命名空间数据通道，无需 session）─────
-    var KIND_LABEL = { fact: "📖事实", preference: "📌偏好", event: "🧭事件", instruction: "📋指令", persona: "👤画像" };
+
 
     function BrowserSection(props) {
       var t = props.t;
+      var KIND_LABEL = { fact: t("browserKindFact"), preference: t("browserKindPreference"), event: t("browserKindEvent"), instruction: t("browserKindInstruction"), persona: t("browserKindPersona") };
       var api = props.api;
       var scope = props.browserScope;
       var [snapshot, setSnapshot] = react.useState(function () { return scope.getSnapshot(); });
@@ -758,7 +779,7 @@ window.__ModuleLoader__.load({
           h("div", { className: "__dsi_browserMain" },
             h("span", { className: "__dsi_browserKind" }, KIND_LABEL[m.kind] || m.kind),
             h("span", { className: "__dsi_browserContent" }, m.content),
-            h("span", { className: "__dsi_browserMeta" }, "★" + m.importance + " · 命中" + m.accessCount + " · " + m.id.slice(0, 8))
+            h("span", { className: "__dsi_browserMeta" }, "★" + m.importance + " · " + t("browserAccessSummary").replace("{n}", String(m.accessCount)) + " · " + m.id.slice(0, 8))
           ),
           h("span", { className: "__dsi_browserOps" },
             h("button", { type: "button", className: "__dsi_btn", onClick: function () { viewDetail(m); }, disabled: busy }, t("browserDetail")),
@@ -832,7 +853,7 @@ window.__ModuleLoader__.load({
         ? (skillsNodes.length ? h("div", { className: "__dsi_collapse" }, skillsNodes) : h("p", { className: "__dsi_status" }, t("browserSkillsEmpty")))
         : h("p", { className: "__dsi_status" }, t("browserSkillsEmpty"));
 
-      var STATUS_LABEL = { active: "活跃", decayed: "已衰减", forgotten: "已遗忘", corrected: "已纠正" };
+      var STATUS_LABEL = { active: t("browserStatusActive"), decayed: t("browserStatusDecayed"), forgotten: t("browserStatusForgotten"), corrected: t("browserStatusCorrected") };
       function fmtTime(ts) {
         try { return new Date(ts).toLocaleString(); } catch (e) { return String(ts); }
       }

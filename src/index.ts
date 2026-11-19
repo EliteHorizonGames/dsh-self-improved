@@ -598,5 +598,5 @@ export function apply(ctx: Context, config: Config): void {
   // ⑥ 后台管线（M2 起：extract/consolidate/evolve，dsh-schedule 驱动）
   // 注：M0 已确认 schedule 服务不在 headless base 装配中，引入时需按装配判断
 
-  log("dsh-self-improved 已加载（M5 完整版）");
+  log("dsh-self-improved loaded (M5)");
 }
