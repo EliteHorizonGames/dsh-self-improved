@@ -73,7 +73,7 @@ check("纯关键词策略命中", kwOnly.some((h) => h.id === m1.id));
 
 // 5) 渲染块
 const block = renderRecallBlock([{ id: m1.id, kind: "preference", content: "用户偏好使用 PowerShell", importance: 8, score: 1 }]);
-check("渲染块含标记与重要度", block.includes("【相关记忆】") && block.includes("重要度 8/10"), block);
+check("渲染块含标记与重要度", block.includes("[Relevant memories]") && block.includes("importance 8/10"), block);
 
 // 6) 降级：embedding 抛错 → 返回空不抛
 const brokenProvider = { async embed() { throw new Error("embedding down"); } };

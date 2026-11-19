@@ -26,13 +26,14 @@ export interface ConsolidateResult {
   personaVersion?: number;
 }
 
-export const SCENE_SYSTEM_PROMPT = `你是记忆组织者。把给出的原子记忆归纳成"场景块"（Scenes）：每个场景是过去一段相关经历的小节，标题简短（4-12 字），正文 3-6 行 Markdown 总结。
-只输出一个 JSON 对象：{"scenes":[{"title":"标题","summary":"正文 Markdown"}]}，不要输出其他文字。`;
+export const SCENE_SYSTEM_PROMPT = `Organize the supplied atomic memories into related scenes. Each scene is a section about a past experience with a short title (4–12 characters) and a 3–6-line Markdown summary.
+Return one JSON object only: {"scenes":[{"title":"title","summary":"Markdown summary"}]}.
+Write titles and summaries in English even when source memories are in another language. Preserve proper names, code, paths and direct quotations verbatim.`;
 
-export const PERSONA_SYSTEM_PROMPT = `你是用户画像分析师。基于记忆库中的用户相关记忆，维护一份精炼的用户画像（Markdown）：
-- 结构：## 基本信息 / ## 偏好与习惯 / ## 工作方式 / ## 已知约定
-- 只写有依据的内容，标注来源类型（事实/偏好）；没有的内容留空小节。
-- 输出为纯 Markdown 文本，不要 JSON、不要解释。`;
+export const PERSONA_SYSTEM_PROMPT = `Maintain a concise user profile in Markdown based only on supplied memories about the user.
+Use headings: ## Basic information / ## Preferences and habits / ## Working style / ## Known agreements.
+Include supported information only, label sources as fact or preference, and leave unsupported sections empty.
+Return plain Markdown, not JSON; write in English even if prior memories or the previous profile use another language. Preserve proper names, code, paths and direct quotations verbatim.`;
 
 export class Consolidator {
   constructor(
@@ -94,8 +95,8 @@ export class Consolidator {
     if (memories.length === 0) return undefined;
     const prev = this.store.getPersona();
     const input = [
-      prev ? `## 上一版画像（供增量参考）\n${prev.content}\n` : "",
-      "## 新记忆\n" + memories.map((m) => `- [${m.kind}] ${m.content}`).join("\n"),
+      prev ? `## Previous profile (for incremental updates)\n${prev.content}\n` : "",
+      "## New memories\n" + memories.map((m) => `- [${m.kind}] ${m.content}`).join("\n"),
     ].join("\n");
     const signal = AbortSignal.timeout(180_000);
     const content = (await this.callLlm({ system: PERSONA_SYSTEM_PROMPT, user: input, signal })).trim();

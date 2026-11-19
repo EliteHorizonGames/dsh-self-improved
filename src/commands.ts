@@ -34,39 +34,39 @@ export function handleMemoryCommand(
   }
   switch (sub) {
     case "evolve": {
-      if (!opts?.evolve) return err("进化功能未安装（仅定时运行）");
+      if (!opts?.evolve) return err("Manual evolution is unavailable (scheduled runs only).");
       const p = opts.evolve();
-      if (json) return ok(JSON.stringify({ kind: "success", text: "进化已触发", value: {} }));
-      return ok("进化已触发，后台执行中（巩固/衰减/技能/治理）…");
+      if (json) return ok(JSON.stringify({ kind: "success", text: "Evolution triggered", value: {} }));
+      return ok("Evolution triggered; running in the background (consolidation, decay, skills and cleanup)…");
     }
     case "search": {
       const q = args.slice(1).join(" ");
-      if (!q) return err("用法：/memory search <关键词>");
+      if (!q) return err("Usage: /memory search <keywords>");
       const hits = store.searchMemories(q, { limit: 8, matchAny: true });
       return hits.length > 0
         ? ok(hits.map((h, i) => `${i + 1}. [${h.kind}] ${h.content}`).join("\n"))
-        : ok("没有相关记忆");
+        : ok("No matching memories.");
     }
     case "list": {
       const recs = store.listMemories({ limit: 20 });
       return recs.length > 0
         ? ok(recs.map((r) => `[${r.status}] ${r.kind} ${r.content}`).join("\n"))
-        : ok("记忆库为空");
+        : ok("The memory store is empty.");
     }
     case "forget": {
       const id = args[1];
-      if (!id) return err("用法：/memory forget <id>");
-      return ok(store.forgetMemory(id) ? `已遗忘 ${id}` : `未找到 ${id}`);
+      if (!id) return err("Usage: /memory forget <id>");
+      return ok(store.forgetMemory(id) ? `Forgotten: ${id}` : `Not found: ${id}`);
     }
     case "correct": {
       const id = args[1];
       const content = args.slice(2).join(" ");
-      if (!id || !content) return err("用法：/memory correct <id> <新内容>");
+      if (!id || !content) return err("Usage: /memory correct <id> <new content>");
       const old = store.getMemory(id);
-      if (!old) return err(`未找到 ${id}`);
+      if (!old) return err(`Not found: ${id}`);
       const rec = store.insertMemory({ kind: old.kind, content, importance: old.importance, supersedes: old.id });
       store.setMemoryStatus(id, "corrected");
-      return ok(`已纠正，新 id: ${rec.id}`);
+      return ok(`Memory corrected; new ID: ${rec.id}`);
     }
     case "status": {
       const active = store.getActiveMemories(10_000).length;
@@ -75,17 +75,17 @@ export function handleMemoryCommand(
       const scenes = store.listScenes(100).length;
       const persona = store.getPersona();
       return ok(
-        `记忆 ${active} 活跃 / ${total} 总计；待提取会话 ${pending}；场景 ${scenes}；画像 v${persona?.ver ?? "-"}`,
+        `Memories: ${active} active / ${total} total; sessions pending extraction: ${pending}; scenes: ${scenes}; persona v${persona?.ver ?? "-"}`,
       );
     }
     default:
       return ok(
-        "dsh-self-improved 记忆命令：\n" +
-          "/memory search <关键词>\n" +
+        "dsh-self-improved memory commands:\n" +
+          "/memory search <keywords>\n" +
           "/memory list\n" +
           "/memory browser --json\n" +
           "/memory forget <id>\n" +
-          "/memory correct <id> <新内容>\n" +
+          "/memory correct <id> <new content>\n" +
           "/memory status",
       );
   }
@@ -177,14 +177,14 @@ export function installMemoryCommands(
   if (!commands) return null;
   return commands.register({
     name: "memory",
-    description: "管理 dsh-self-improved 记忆库（search/list/forget/correct/status/evolve）",
+    description: "Manage the dsh-self-improved memory store (search/list/forget/correct/status/evolve).",
     // 关键：声明 input 后命令系统才会接管带参输入（如 /memory status），
     // 否则带参输入被判定为"命令不接受参数"而回落为普通消息发给 LLM。
-    input: { hint: "search <词> | list | status | forget <id> | correct <id> <内容> | evolve | browser" },
+    input: { hint: "search <keywords> | list | status | forget <id> | correct <id> <content> | evolve | browser" },
     handler: async (invocation: { rawInput?: string }) => {
       // 兜底：即使注销存在时序窗口，关闭状态下也拒绝执行
       if (opts?.isEnabled && !opts.isEnabled()) {
-        return { kind: "error" as const, text: "插件已关闭（dsh-self-improved enabled=false），/memory 命令不可用" };
+        return { kind: "error" as const, text: "The plugin is disabled (dsh-self-improved enabled=false); /memory is unavailable." };
       }
       return handleMemoryCommand(store, invocation.rawInput ?? "", opts);
     },

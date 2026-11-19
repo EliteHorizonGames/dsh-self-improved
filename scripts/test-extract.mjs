@@ -81,11 +81,11 @@ check("pump 处理 5 个会话", result.sessions === 5, `sessions=${result.sessi
 check("合法 JSON 提取 2 条", result.memories >= 2, `memories=${result.memories} skipped=${result.skipped}`);
 check("偏好可检索", store.searchMemories("PowerShell", { limit: 5 }).length >= 1);
 check("事实可检索", store.searchMemories("Windows", { limit: 5 }).length >= 1);
-check("坏输出兜底摘要", store.searchMemories("自动摘要", { limit: 5 }).length >= 1);
+check("坏输出兜底摘要", store.searchMemories("Auto-summary", { limit: 5 }).length >= 1);
 check(
   "合法空结果不触发兜底（自动摘要仅 1 条）",
-  store.listMemories().filter((m) => m.content.includes("[自动摘要]")).length === 1,
-  `got ${store.listMemories().filter((m) => m.content.includes("[自动摘要]")).length}`,
+  store.listMemories().filter((m) => m.content.includes("[Auto-summary]")).length === 1,
+  `got ${store.listMemories().filter((m) => m.content.includes("[Auto-summary]")).length}`,
 );
 check(
   "空结果不产生记忆",

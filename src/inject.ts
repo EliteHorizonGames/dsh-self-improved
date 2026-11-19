@@ -48,7 +48,7 @@ export function installRecallInjection(ctx: Context, recall: RecallService, cont
       if (controller.debug) console.log("[dsh-self-improved] recall hits:", hits.length, hits.map((h) => h.kind).join(","));
       let block = renderRecallBlock(hits, controller.maxHits);
       if (controller.maxChars && block.length > controller.maxChars) {
-        block = block.slice(0, controller.maxChars) + "\n…（已截断）";
+        block = block.slice(0, controller.maxChars) + "\n… (truncated)";
       }
       if (!block) return decision;
 

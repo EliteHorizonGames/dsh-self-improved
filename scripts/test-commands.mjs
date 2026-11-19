@@ -29,7 +29,7 @@ check("help 列出子命令", help.kind === "success" && help.text.includes("/me
 const s1 = handleMemoryCommand(store, "search PowerShell");
 check("search 命中", s1.kind === "success" && s1.text.includes("PowerShell"), s1.text.slice(0, 40));
 const s2 = handleMemoryCommand(store, "search 不存在的xyz");
-check("search 无命中", s2.text.includes("没有"));
+check("search 无命中", s2.text.includes("No matching memories"));
 const s3 = handleMemoryCommand(store, "search");
 check("search 缺参数报错", s3.kind === "error");
 
@@ -39,18 +39,18 @@ check("list 输出记忆", l1.text.includes("preference") && l1.text.includes("f
 
 // forget
 const f1 = handleMemoryCommand(store, `forget ${m1.id}`);
-check("forget 生效", f1.text.includes("已遗忘"));
-check("forget 后检索不到", handleMemoryCommand(store, "search PowerShell").text.includes("没有"));
+check("forget 生效", f1.text.includes("Forgotten:"));
+check("forget 后检索不到", handleMemoryCommand(store, "search PowerShell").text.includes("No matching memories"));
 
 // correct
 const c1 = handleMemoryCommand(store, `correct ${m1.id} 用户偏好使用 PowerShell 或 pwsh`);
-check("correct 生成新记忆", c1.kind === "success" && c1.text.includes("新 id"));
+check("correct 生成新记忆", c1.kind === "success" && c1.text.includes("new ID"));
 const corrected = handleMemoryCommand(store, "search pwsh");
 check("correct 后新内容可检索", corrected.text.includes("pwsh"), corrected.text.slice(0, 40));
 
 // status
 const st = handleMemoryCommand(store, "status");
-check("status 输出统计", st.text.includes("记忆") && st.text.includes("画像 v"));
+check("status 输出统计", st.text.includes("Memories:") && st.text.includes("persona v"));
 
 // 未知子命令 → help
 const u = handleMemoryCommand(store, "bogus");

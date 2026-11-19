@@ -163,20 +163,20 @@ function rrfFuse(lists: RecallHit[][], limit: number): RecallHit[] {
 /** 渲染注入块（纯函数，供测试与 agent/pre-step 注入使用） */
 export function renderRecallBlock(hits: RecallHit[], maxHits = 5): string {
   if (hits.length === 0) return "";
-  const lines = hits.slice(0, maxHits).map((h) => `- [${kindLabel(h.kind)}] ${h.content}（重要度 ${h.importance}/10）`);
-  return `【相关记忆】\n${lines.join("\n")}`;
+  const lines = hits.slice(0, maxHits).map((h) => `- [${kindLabel(h.kind)}] ${h.content} (importance ${h.importance}/10)`);
+  return `[Relevant memories]\n${lines.join("\n")}`;
 }
 
 function kindLabel(kind: string): string {
   switch (kind) {
     case "fact":
-      return "事实";
+      return "Fact";
     case "preference":
-      return "偏好";
+      return "Preference";
     case "event":
-      return "事件";
+      return "Event";
     case "instruction":
-      return "指令";
+      return "Instruction";
     default:
       return kind;
   }

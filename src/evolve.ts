@@ -37,15 +37,15 @@ export interface EvolveCallLlm {
   (input: { system: string; user: string; signal: AbortSignal }): Promise<string>;
 }
 
-export const SKILL_SYSTEM_PROMPT = `你是技能提炼器。基于用户与 AI 协作中沉淀的记忆，提炼一条可复用的标准操作流程（SOP）技能。
-输出一个 Markdown 文件，格式严格如下：
+export const SKILL_SYSTEM_PROMPT = `Distill one reusable standard operating procedure (SOP) skill from memories of user-AI collaboration.
+Return exactly one Markdown file with this format:
 ---
-name: 技能名（小写 kebab-case，如 bump-pnpm-deps）
-description: 一句话说明（30 字内）
-whenToUse: 什么场景下使用
+name: lowercase-kebab-case-skill-name
+description: a one-sentence description (at most 30 characters)
+whenToUse: circumstances for using this skill
 ---
-技能正文：触发条件、操作步骤（1. 2. 3.）、注意事项、反例。
-只输出这个 Markdown，不要额外文字。`;
+Skill body: triggers, numbered steps (1. 2. 3.), precautions and counterexamples.
+Output Markdown only. Write descriptions and the body in English even when the memories are in another language. Preserve proper names, code, paths and direct quotations verbatim.`;
 
 /** 记忆评分：importance × recency × (1 + log(1+access)) */
 export function memoryScore(record: {

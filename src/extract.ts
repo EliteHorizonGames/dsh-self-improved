@@ -46,16 +46,16 @@ export interface ExtractPumpResult {
   errors: number;
 }
 
-export const EXTRACT_SYSTEM_PROMPT = `你是长期记忆提取器。你的任务是从对话中提取"值得长期记住"的原子记忆。
-
-要求：
-1. 只输出一个 JSON 对象，不要输出任何其他文字、解释或代码块标记。
-2. JSON 结构固定为：{"memories":[{"kind":"fact|preference|event|instruction","content":"一句话","importance":1-10}]}
-3. kind 含义：fact=客观事实；preference=用户偏好/习惯；event=发生的事件；instruction=给未来 AI 的指令/约定。
-4. content 必须是独立可检索的一句话（第三人称、不含"我说/用户说"），不超过 80 字。
-5. importance 1-10：对长期协作价值越高分越高；琐碎寒暄不提取。
-6. 不提取：API 密钥、密码、令牌等敏感凭据；临时性内容。
-7. 没有值得记住的内容时输出 {"memories":[]}。`;
+export const EXTRACT_SYSTEM_PROMPT = `Extract atomic memories worth retaining long term from the conversation.
+Requirements:
+1. Return exactly one JSON object, with no explanation or code fences.
+2. Use this structure: {"memories":[{"kind":"fact|preference|event|instruction","content":"one sentence","importance":1-10}]}
+3. kind: fact = objective fact; preference = user preference or habit; event = an event that occurred; instruction = an instruction or agreement for future assistance.
+4. Each content value must be one independently retrievable third-person sentence, without "I said" or "the user said", at most 80 characters.
+5. Rate importance from 1 to 10 based on long-term usefulness; skip trivial small talk.
+6. Exclude sensitive credentials (API keys, passwords, tokens) and transient details.
+7. Return {"memories":[]} when there is nothing valuable to save.
+8. Write content in English even when the conversation uses another language; preserve proper names, code, paths and direct quotations verbatim.`;
 
 const SENSITIVE_RE = /\b(sk-[A-Za-z0-9]{8,}|api[_-]?key\s*[:=]|password\s*[:=]|token\s*[:=])\b/i;
 
@@ -173,7 +173,7 @@ export class Extractor {
     if (drafts.length === 0 && !parsedOk && this.settings.fallbackOnBadJson && text.trim()) {
       const summary = summarize(sourceSummary, 200);
       if (summary) {
-        drafts.push({ kind: "event", content: `[自动摘要] ${summary}`, importance: 1 });
+        drafts.push({ kind: "event", content: `[Auto-summary] ${summary}`, importance: 1 });
       }
     }
     return drafts;
@@ -203,14 +203,14 @@ const MIN_PUMP_INTERVAL_MS = 30_000;
 /** 渲染 LLM 输入：角色标注 + 头尾截断 */
 function renderPrompt(slices: ConversationSliceRecord[], maxChars: number): string {
   const parts = slices.map((s) => {
-    const role = s.type === "user" ? "用户" : s.type === "assistant" ? "AI" : "工具结果";
-    return `${role}：${s.text}`;
+    const role = s.type === "user" ? "User" : s.type === "assistant" ? "Assistant" : "Tool result";
+    return `${role}: ${s.text}`;
   });
   const joined = parts.join("\n");
   if (joined.length <= maxChars) return joined;
   const head = Math.floor(maxChars * 0.6);
   const tail = maxChars - head;
-  return joined.slice(0, head) + "\n…[中间省略]…\n" + joined.slice(-tail);
+  return joined.slice(0, head) + "\n…[middle omitted]…\n" + joined.slice(-tail);
 }
 
 /** 从模型文本中尽量提取 JSON（容忍代码块包裹/前后杂讯） */

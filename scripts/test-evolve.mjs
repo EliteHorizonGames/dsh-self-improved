@@ -5,7 +5,7 @@
 import { rmSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MemoryStore } from "../lib/storage.js";
-import { Consolidator } from "../lib/consolidate.js";
+import { Consolidator, SCENE_SYSTEM_PROMPT } from "../lib/consolidate.js";
 import { applyDecay, memoryScore, synthesizeSkills, deleteSkill } from "../lib/evolve.js";
 
 const dir = join(process.env.TEST_DIR ?? "E:\\dshPro\\.dsh-test", "m4-unit");
@@ -29,7 +29,7 @@ store.insertMemory({ kind: "instruction", content: "更新依赖时用 pnpm 并�
 // ---------- 1) 场景归纳 ----------
 // 假 LLM：按 system 提示词区分场景/画像调用
 const branchedFakeLlm = async ({ system }) =>
-  system.includes("场景块")
+  system === SCENE_SYSTEM_PROMPT
     ? JSON.stringify({ scenes: [{ title: "工具链协作", summary: "用户用 pnpm 管理依赖，偏好 PowerShell。" }] })
     : `## 基本信息\n- 使用 Windows 与 PowerShell\n\n## 偏好与习惯\n- 偏好 pnpm 管理依赖`;
 const consolidator = new Consolidator(store, { sceneMaxMemories: 50, personaMaxMemories: 30, sceneBatchSize: 8 }, branchedFakeLlm);
